@@ -6,15 +6,17 @@ Pet Feeder
  */
 #include <string.h>
 #include <time.h>
+#include <Servo.h>
+
 //#include <DateTime.h>
 //#include <DateTimeStrings.h>
 
 int sensorPin = A0;    // select the input pin for the potentiometer
 int ledPin = 13;      // select the pin for the LED
 int sensorValue = 0;  // variable to store the value coming from the sensor
+const int servo_neutralpos = 90;
 double iScaleZero = 0;
-short LF = 10;
-
+Servo myservo;
 
 int par_pets;
 
@@ -23,6 +25,7 @@ typedef struct
   int par_gram;
   int par_hour;
   int par_min;
+  int par_pos;
 } petfile;
 
 petfile profile[3];
@@ -34,6 +37,10 @@ void setup() {
   Serial.begin(9600);
   // declare the ledPin as an OUTPUT:
   pinMode(ledPin, OUTPUT);
+  //attach a servo
+  myservo.attach(9);
+  profile[1].par_pos = 0;
+  profile[2].par_pos = 180;
 }
 
 double GetWeight(void)
@@ -137,6 +144,9 @@ void FeedTime(int profileID)
     digitalWrite(13, LOW);  //turn off the vibro feeder
     feeddone = true;
   }
+  myservo.write(profile[profileID].par_pos);
+  delay(500);
+  myservo.write(servo_neutralpos);
   return;
  }
 
@@ -151,6 +161,8 @@ void loop() {
   while (1)
   {
     FeedTime(1);
+    delay(500);  
+    FeedTime(2);
     //Serial.println(GetWeight());
     delay(500);
 
